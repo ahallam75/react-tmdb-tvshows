@@ -23,14 +23,24 @@ import NoImage from './images/no_image.jpg';
 
 const Home = () => {
   const [
-    { 
-      state: {movies, currentPage, totalPages, heroImage}, 
-      loading, 
-      error, 
-      fetchMovies
-    }
+    {
+      state: { movies, currentPage, totalPages, heroImage },
+      loading,
+      error
+    },
+    fetchMovies
   ] = useHomeFetch();
+
   const [searchTerm, setSearchTerm] = useState('');
+
+  const loadMoreMovies = () => {
+    const searchEndpoint = `${API_URL}search/movie?api_key=${API_KEY}&query=${searchTerm}&page=${currentPage + 1}`;
+    const popularEndpoint = `${API_URL}movie/popular?api_key=${API_KEY}&page=${currentPage + 1}`;
+
+    const endpoint = searchTerm ? searchEndpoint : popularEndpoint;
+
+    fetchMovies(endpoint);
+  }
 
   if(error) return <div>Something went wrong...</div>;
 
@@ -61,9 +71,10 @@ const Home = () => {
           />
         ))}
       </Grid>
-      <MovieThumb />
-      <Spinner />
-      <LoadMoreBtn />
+      {loading && <Spinner />}
+      {currentPage < totalPages && !loading && (
+        <LoadMoreBtn text="Load More" callback={loadMoreMovies} />
+      )}
     </React.Fragment>
   )
 }
